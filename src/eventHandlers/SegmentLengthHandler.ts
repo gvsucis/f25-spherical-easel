@@ -12,6 +12,8 @@ import { StyleCategory } from "@/types/Styles";
 import { SetNoduleDisplayCommand } from "@/commands/SetNoduleDisplayCommand";
 import { LabelDisplayMode, ValueDisplayMode } from "@/types";
 import { SetValueDisplayModeCommand } from "@/commands/SetValueDisplayModeCommand";
+import { useAccountStore } from "@/stores/account";
+import { storeToRefs } from "pinia";
 
 export default class SegmentLengthHandler extends Highlighter {
   constructor(layers: Group[]) {
@@ -44,11 +46,12 @@ export default class SegmentLengthHandler extends Highlighter {
       }
     });
     if (segmentList.length > 0) {
+      const userProfile = storeToRefs(useAccountStore()).userProfile;
       // Glow the first SESegment that hasn't been measured
       segmentList[0].glowing = true;
       const len = segmentList[0].arcLength;
       this.infoText.text = `Arc length ${(len / Math.PI).toFixed(
-        SETTINGS.decimalPrecision
+        userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision
       )}\u{1D7B9}`;
     }
   }

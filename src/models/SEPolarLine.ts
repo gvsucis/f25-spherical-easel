@@ -5,6 +5,8 @@ import i18n from "@/i18n";
 import { Vector3 } from "three";
 import { SELine } from "./SELine";
 import { SEPoint } from "./SEPoint";
+import { useAccountStore } from "@/stores/account";
+import { storeToRefs } from "pinia";
 const { t } = i18n.global;
 
 export class SEPolarLine
@@ -41,12 +43,13 @@ export class SEPolarLine
   }
 
   public get noduleDescription(): string {
+    const userProfile = storeToRefs(useAccountStore()).userProfile;
     return String(
       i18n.global.t(`objectTree.polarLine`, {
         pt: this.polarPointParent.label?.ref.shortUserName,
-        normalX: this._normalVector.x.toFixed(SETTINGS.decimalPrecision),
-        normalY: this._normalVector.y.toFixed(SETTINGS.decimalPrecision),
-        normalZ: this._normalVector.z.toFixed(SETTINGS.decimalPrecision)
+        normalX: this._normalVector.x.toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision),
+        normalY: this._normalVector.y.toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision),
+        normalZ: this._normalVector.z.toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision)
       })
     );
   }

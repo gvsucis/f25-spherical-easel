@@ -18,6 +18,8 @@ import { ValueDisplayMode } from "@/types";
 import { Vector } from "two.js/src/vector";
 import { Text } from "two.js/src/text";
 import { Group } from "two.js/src/group";
+import { useAccountStore } from "@/stores/account";
+import { storeToRefs } from "pinia";
 //import { Shape } from "two.js/src/shape";
 
 /**
@@ -582,7 +584,8 @@ export default class Label extends Nodule {
    *
    * Apply CurrentVariables means that all current values of the private style variables are copied into the actual js objects
    */
-  stylize(flag: DisplayStyle): void {
+stylize(flag: DisplayStyle): void {
+    const userProfile = storeToRefs(useAccountStore()).userProfile;
     switch (flag) {
       case DisplayStyle.ApplyTemporaryVariables: {
         // There is no temporary text so this should never be called
@@ -602,7 +605,7 @@ export default class Label extends Nodule {
               labelText =
                 "(" +
                 `${this._value
-                  .map(num => num.toFixed(SETTINGS.decimalPrecision))
+                  .map(num => num.toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision))
                   .join(",")}` +
                 ")";
             } else {
@@ -611,19 +614,19 @@ export default class Label extends Nodule {
           } else {
             switch (this._valueDisplayMode) {
               case ValueDisplayMode.Number:
-                labelText = this._value[0].toFixed(SETTINGS.decimalPrecision);
+                  labelText = this._value[0].toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision);
                 break;
               case ValueDisplayMode.MultipleOfPi:
                 labelText =
                   (this._value[0] / Math.PI).toFixed(
-                    SETTINGS.decimalPrecision
+                    userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision
                   ) + "\u{1D7B9}";
                 break;
               case ValueDisplayMode.DegreeDecimals:
                 labelText =
                   this._value[0]
                     .toDegrees()
-                    .toFixed(SETTINGS.decimalPrecision) + "\u{00B0}";
+                    .toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision) + "\u{00B0}";
                 break;
               case ValueDisplayMode.EarthModeMiles:
                 if (this.seLabelParentType == "polygon") {
@@ -632,12 +635,12 @@ export default class Label extends Nodule {
                       this._value[0] *
                       SETTINGS.earthMode.radiusMiles *
                       SETTINGS.earthMode.radiusMiles
-                    ).toFixed(SETTINGS.decimalPrecision) + " mi\u{00B2}"; //TODO: How do I internationalize this?
+                  ).toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision) + " mi\u{00B2}"; //TODO: How do I internationalize this?
                   break;
                 } else {
                   labelText =
                     (this._value[0] * SETTINGS.earthMode.radiusMiles).toFixed(
-                      SETTINGS.decimalPrecision
+                      userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision
                     ) + " mi"; //TODO: How do I internationalize this?
                   break;
                 }
@@ -648,13 +651,13 @@ export default class Label extends Nodule {
                       this._value[0] *
                       SETTINGS.earthMode.radiusKilometers *
                       SETTINGS.earthMode.radiusKilometers
-                    ).toFixed(SETTINGS.decimalPrecision) + " km\u{00B2}"; //TODO: How do I internationalize this?
+                    ).toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision) + " km\u{00B2}"; //TODO: How do I internationalize this?
                   break;
                 } else {
                   labelText =
                     (
                       this._value[0] * SETTINGS.earthMode.radiusKilometers
-                    ).toFixed(SETTINGS.decimalPrecision) + " km"; //TODO: How do I internationalize this?
+                  ).toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision) + " km"; //TODO: How do I internationalize this?
                   break;
                 }
             }
@@ -792,29 +795,30 @@ export default class Label extends Nodule {
     }
   }
   convertXYZtoLatLong(coords: number[]): string {
+    const userProfile = storeToRefs(useAccountStore()).userProfile;
     const latitude = Math.asin(coords[2]);
     const longitude = Math.atan2(coords[1], coords[0]);
     let latitudeString: string;
     if (latitude < 0) {
       latitudeString =
-        Math.abs(latitude).toDegrees().toFixed(SETTINGS.decimalPrecision) +
+        Math.abs(latitude).toDegrees().toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision) +
         "\u{00B0}" +
         "S";
     } else {
       latitudeString =
-        latitude.toDegrees().toFixed(SETTINGS.decimalPrecision) +
+        latitude.toDegrees().toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision) +
         "\u{00B0}" +
         "N";
     }
     let longitudeString: string;
     if (longitude < 0) {
       longitudeString =
-        Math.abs(longitude).toDegrees().toFixed(SETTINGS.decimalPrecision) +
+        Math.abs(longitude).toDegrees().toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision) +
         "\u{00B0}" +
         "W";
     } else {
       longitudeString =
-        longitude.toDegrees().toFixed(SETTINGS.decimalPrecision) +
+        longitude.toDegrees().toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision) +
         "\u{00B0}" +
         "E";
     }

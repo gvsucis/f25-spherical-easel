@@ -20,6 +20,8 @@ import NonFreeSegment from "@/plottables/NonFreeSegment";
 import { DisplayStyle } from "@/plottables/Nodule";
 import { SELabel } from "./SELabel";
 import { SEPoint } from "./SEPoint";
+import { useAccountStore } from "@/stores/account";
+import { storeToRefs } from "pinia";
 const { t } = i18n.global;
 
 const styleSet = new Set([
@@ -153,13 +155,14 @@ export class SESegment
   }
 
   public get noduleDescription(): string {
+    const userProfile = storeToRefs(useAccountStore()).userProfile;
     return String(
       i18n.global.t(`objectTree.segmentThrough`, {
         pt1: this._startSEPoint.label?.ref.shortUserName,
         pt2: this._endSEPoint.label?.ref.shortUserName,
-        normalX: this._normalVector.x.toFixed(SETTINGS.decimalPrecision),
-        normalY: this._normalVector.y.toFixed(SETTINGS.decimalPrecision),
-        normalZ: this._normalVector.z.toFixed(SETTINGS.decimalPrecision)
+        normalX: this._normalVector.x.toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision),
+        normalY: this._normalVector.y.toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision),
+        normalZ: this._normalVector.z.toFixed(userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision)
       })
     );
   }

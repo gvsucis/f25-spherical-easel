@@ -6,6 +6,8 @@ import SETTINGS from "@/global-settings";
 import { Visitor } from "@/visitors/Visitor";
 import i18n from "@/i18n";
 import EventBus from "@/eventHandlers/EventBus";
+import { useAccountStore } from "@/stores/account";
+import { storeToRefs } from "pinia";
 const { t } = i18n.global;
 
 // const emptySet = new Set<string>();
@@ -77,22 +79,23 @@ export abstract class SEExpression extends SENodule {
   }
 
   prettyValue(fullPrecision = false): string {
+    const userProfile = storeToRefs(useAccountStore()).userProfile;
     switch (this._valueDisplayMode) {
       case ValueDisplayMode.Number:
         return String(
-          this.value.toFixed(fullPrecision ? 20 : SETTINGS.decimalPrecision)
+          this.value.toFixed(fullPrecision ? 20 : userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision)
         );
       case ValueDisplayMode.MultipleOfPi:
         return (
           (this.value / Math.PI).toFixed(
-            fullPrecision ? 20 : SETTINGS.decimalPrecision
+            fullPrecision ? 20 : userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision
           ) + "\u{1D7B9}"
         );
       case ValueDisplayMode.DegreeDecimals:
         return (
           this.value
             .toDegrees()
-            .toFixed(fullPrecision ? 20 : SETTINGS.decimalPrecision) +
+            .toFixed(fullPrecision ? 20 : userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision) +
           "\u{00B0}"
         );
       case ValueDisplayMode.EarthModeMiles:
@@ -109,7 +112,7 @@ export abstract class SEExpression extends SENodule {
         } else {
           return (
             (this.value * SETTINGS.earthMode.radiusMiles).toFixed(
-              fullPrecision ? 20 : SETTINGS.decimalPrecision
+              fullPrecision ? 20 : userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision
             ) + t(`units.mi`)
           );
         }
@@ -127,14 +130,14 @@ export abstract class SEExpression extends SENodule {
         } else {
           return (
             (this.value * SETTINGS.earthMode.radiusKilometers).toFixed(
-              fullPrecision ? 20 : SETTINGS.decimalPrecision
+              fullPrecision ? 20 : userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision
             ) + t(`units.km`)
           );
         }
       default: // return the number mode string as a default, but warn the user
         console.warn(`ValueDisplayMode for ${this.name} was undefined`);
         return String(
-          this.value.toFixed(fullPrecision ? 20 : SETTINGS.decimalPrecision)
+          this.value.toFixed(fullPrecision ? 20 : userProfile.value.decimalPrecision ?? SETTINGS.decimalPrecision)
         );
     }
   }
