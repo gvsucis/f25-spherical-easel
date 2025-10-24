@@ -1,6 +1,7 @@
 import { Ref, ref } from "vue";
 import { defineStore } from "pinia";
 import { ActionMode, ToolButtonGroup, ToolButtonType } from "@/types";
+import SETTINGS from "@/global-settings";
 import { toolGroups } from "@/components/toolgroups";
 import {
   DocumentSnapshot,
@@ -52,7 +53,8 @@ export const useAccountStore = defineStore("acct", () => {
     role: "Community Member",
     preferredLanguage: "en",
     favoriteTools: "#",
-    userStarredConstructions: []
+    userStarredConstructions: [],
+    decimalPrecision: SETTINGS.decimalPrecision
   };
 
   const userProfile: Ref<UserProfile> = ref(DEFAULT_PROFILE);
@@ -201,7 +203,7 @@ export const useAccountStore = defineStore("acct", () => {
   async function saveUserProfile() {
     const favToolsAsString = favoriteTools.value
       .map(arr => arr.map(s => s.trim()).join(","))
-      .join("#");
+          .join("#");
     const profileDoc = doc(appDB, "users", firebaseUid.value!);
     await setDoc(
       profileDoc,

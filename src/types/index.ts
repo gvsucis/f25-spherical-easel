@@ -664,6 +664,7 @@ export interface UserProfile {
   favoriteTools: string;
   preferredLanguage: string;
   userStarredConstructions: Array<string>;
+  decimalPrecision: number;
 }
 
 export enum AngleMode {
