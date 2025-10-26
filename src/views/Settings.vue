@@ -18,19 +18,16 @@
         <v-container fluid>
           <v-row>
             <v-col cols="4">
+                <v-sheet rounded="lg" elevation="2">
+                    <v-radio-group v-model="userProfile!.decimalPrecision" inline label="Decimal Precision">
+                        <v-radio label="1" :value="1"></v-radio>
+                        <v-radio label="3" :value="3"></v-radio>
+                        <v-radio label="5" :value="5"></v-radio>
+                        <v-radio label="7" :value="7"></v-radio>
+                    </v-radio-group>
+                </v-sheet>
             </v-col>
-            <v-col cols="4">
-              <v-sheet rounded="lg" elevation="2">
-                <v-radio-group
-                  v-model="decimalPrecision"
-                  inline
-                  label="Decimal Precision">
-                  <v-radio label="3" value="3"></v-radio>
-                  <v-radio label="5" value="5"></v-radio>
-                  <v-radio label="7" value="7"></v-radio>
-                </v-radio-group>
-              </v-sheet>
-            </v-col>
+              <!--
             <v-col cols="4">
               <v-sheet rounded="lg" elevation="2">
                 <v-radio-group inline label="Selection Precision">
@@ -39,14 +36,17 @@
                 </v-radio-group>
               </v-sheet>
             </v-col>
+                  -->
           </v-row>
         </v-container>
+          <!--
         <h3>Label options</h3>
         <v-radio-group label="Object Label" inline>
           <v-radio label="None"></v-radio>
           <v-radio label="All"></v-radio>
           <v-radio label="Default"></v-radio>
         </v-radio-group>
+              -->
       </v-sheet>
     </v-window-item>
 
@@ -63,27 +63,43 @@
 import UserProfileUI from "./UserProfile.vue";
 import FavoriteToolsPicker from "@/components/FavoriteToolsPicker.vue";
 import EventBus from "@/eventHandlers/EventBus";
-import { ref } from "vue";
+import { onBeforeMount, ref, Ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useAccountStore } from "@/stores/account";
+import { storeToRefs } from "pinia";
 const router = useRouter();
 type LocaleName = {
   locale: string;
   name: string;
 };
+const emits = defineEmits(["profile-changed"]);
 const { t } = useI18n();
 const acctStore = useAccountStore();
+const { userEmail, userProfile, temporaryProfilePictureURL } =
+  storeToRefs(acctStore);
 // const imageUpload: Ref<HTMLInputElement | null> = ref(null);
-const decimalPrecision = ref(3);
 const selectedTab = ref(0);
-const profileChanged = ref(false)
+const profileChanged = ref(false);
 // The displayed favorite tools (includes defaults)
+let oldUserProfile: UserProfile;
+
+onBeforeMount(() => {
+    oldUserProfile = { ...userProfile.value };
+});
+watch(
+    () => userProfile.value,
+    newProfile => {
+        const changed = JSON.stringify(oldUserProfile) !== JSON.stringify(newProfile)
+        // console.debug("User profile watcher", unchanged, newProfile)
+        emits("profile-changed", changed);
+    }, { deep: true }
+);
 
 async function doSave(): Promise<void> {
   await acctStore.saveUserProfile();
   EventBus.fire("show-alert", {
-    key: "Your profile has been update",
+    key: "Your profile has been updated",
     type: "info"
   });
   router.back();
